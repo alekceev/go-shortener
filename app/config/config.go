@@ -9,6 +9,7 @@ type Config struct {
 	ReadTimeout       int    `envconfig:"READ_TIMEOUT" default:"30" required:"true"`
 	WriteTimeout      int    `envconfig:"WRITE_TIMEOUT" default:"30" required:"true"`
 	ReadHeaderTimeout int    `envconfig:"READ_HEADER_TIMEOUT" default:"30" required:"true"`
+	DSN               string `envconfig:"DSN" default:"" required:"true"`
 }
 
 // init config

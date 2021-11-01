@@ -14,6 +14,7 @@ import (
 	"github.com/alekceev/go-shortener/app/repos/target"
 	"github.com/alekceev/go-shortener/app/starter"
 	"github.com/alekceev/go-shortener/db/mem"
+	"github.com/alekceev/go-shortener/db/pg"
 )
 
 func main() {
@@ -24,8 +25,15 @@ func main() {
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 
-	// var store url.URLStore
-	store := mem.NewMemStore()
+	var store target.URLStore
+	if len(conf.DSN) == 0 {
+		store = mem.NewMemStore()
+	} else {
+		store, err = pg.NewPgStore(conf.DSN)
+		if err != nil {
+			log.Println(err)
+		}
+	}
 
 	urls := target.NewUrls(store)
 	app := starter.NewApp(urls)

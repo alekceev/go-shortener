@@ -9,5 +9,6 @@ require (
 	github.com/go-chi/chi/v5 v5.0.5
 	github.com/go-chi/render v1.0.1
 	github.com/google/uuid v1.3.0
+	github.com/jackc/pgx/v4 v4.13.0 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
 )

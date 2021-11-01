@@ -36,7 +36,7 @@ func (s *Server) Stop() {
 func (s *Server) Start() {
 	go func() {
 		if err := s.srv.ListenAndServe(); err != nil {
-			log.Panicln(err)
+			log.Println(err)
 		}
 	}()
 }

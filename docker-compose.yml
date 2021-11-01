@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  database:
+    image: postgres
+    environment:
+      POSTGRES_USER: www
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: shortener
+    ports:
+      - 5432:5432
+
+  shortener:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    image: shortener:latest
+    restart: always
+    volumes:
+      - ./.database/pg/data:/var/lib/postgresql/data
+    environment:
+      PORT: 8080
+      DSN: 'postgres://www:123456@database:5432/shortener'
+      READ_TIMEOUT: 30
+      WRITE_TIMEOUT: 30
+      READ_HEADER_TIMEOUT: 30
+    ports:
+      - 8080:8080
+    depends_on:
+      - database
