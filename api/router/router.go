@@ -80,7 +80,7 @@ func (rt *Router) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 		StatsURL: "/stats/" + u.ShortURL,
 	}
 
-	render.Render(w, r, responseURL)
+	_ = render.Render(w, r, responseURL)
 }
 
 func (rt *Router) RedirectURL(w http.ResponseWriter, r *http.Request, shortURL string) {
@@ -101,5 +101,5 @@ func (rt *Router) GetStats(w http.ResponseWriter, r *http.Request, shortURL stri
 		return
 	}
 
-	render.Render(w, r, Url(url))
+	_ = render.Render(w, r, Url(url))
 }
