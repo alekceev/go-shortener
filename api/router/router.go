@@ -64,13 +64,13 @@ func (ResponseURL) Render(w http.ResponseWriter, r *http.Request) error {
 func (rt *Router) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 	ru := Url{}
 	if err := render.Bind(r, &ru); err != nil {
-		render.Render(w, r, ErrInvalidRequest(err))
+		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
 
 	u, err := rt.hs.Create(r.Context(), handler.URL(ru))
 	if err != nil {
-		render.Render(w, r, ErrRender(err))
+		_ = render.Render(w, r, ErrRender(err))
 		return
 	}
 
