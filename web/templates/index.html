@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Shortener</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.5/css/uikit.min.css" />
+    </head>
+    <body>
+        <div class="uk-container">
+            <div class="uk-card uk-card-body">
+                <h3 class="uk-card-title uk-heading-divider">Urls Shortener</h3>
+
+                <div class="uk-margin">
+                    <label for="url" class="uk-form-label">URL:</label>
+                    <input id="url" class="uk-input" placeholder="https://google.com" type="text">
+                    <button id="generate" class="uk-button uk-button-primary uk-width-1-1 uk-margin-small-bottom">Generate</button>
+
+                    <ul class="uk-list">
+                        <li><a class="uk-link-muted" id="short_url"></a></li>
+                        <li><a class="uk-link-muted" id="stats_url"></a></li>
+                    </ul>
+                </div>
+                <div class="uk-text-right">
+                    <a class="uk-link-muted" href="/openapi">OpenAPI</a>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+            <script>
+                "use strict";
+                let btn      = document.getElementById("generate");
+                let URL      = document.getElementById("url");
+                let shortURL = document.getElementById("short_url");
+                let statsURL = document.getElementById("stats_url");
+
+                const sendPostRequest = async (req) => {
+                    try {
+                        const resp = await axios.post('{{ .Host }}', req);
+                        console.log(resp.data);
+
+                        shortURL.setAttribute("href", resp.data.short_url);
+                        shortURL.textContent = window.location.protocol + "//" + window.location.host + resp.data.short_url;
+                        statsURL.setAttribute("href", resp.data.stats_url);
+                        statsURL.textContent = "Stats HERE";
+
+                        shortURL.classList.remove("hidden");
+                        statsURL.classList.remove("hidden");
+                    } catch (err) {
+                        console.error(err);
+                    }
+                };
+
+                btn.onclick = function() {
+                    const request = {
+                        URL: URL.value
+                    };
+                    sendPostRequest(request);
+                };
+            </script>
+
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.5/css/uikit.min.css" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.5/js/uikit.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.5/js/uikit-icons.min.js"></script>
+        </footer>
+    </body>
+</html>

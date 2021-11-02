@@ -2,11 +2,13 @@ package router
 
 import (
 	"encoding/json"
+	"html/template"
 	"log"
 	"net/http"
 
 	"github.com/alekceev/go-shortener/api/handler"
 	"github.com/alekceev/go-shortener/api/openapi"
+	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 )
@@ -18,10 +20,18 @@ type Router struct {
 
 func NewRouter(hs *handler.Handlers) *Router {
 	r := chi.NewRouter()
+	r.Use(middleware.Logger)
 
 	ret := &Router{
 		hs: hs,
 	}
+
+	r.Get("/", ret.GetMainPage)
+	r.Get("/openapi", ret.GetOpenAPI)
+	r.Get("/static/{filename}", func(w http.ResponseWriter, r *http.Request) {
+		log.Println(r.RequestURI)
+		http.StripPrefix("/static", http.FileServer(http.Dir("./web/static"))).ServeHTTP(w, r)
+	})
 
 	r.Mount("/", openapi.Handler(ret))
 	swg, err := openapi.GetSwagger()
@@ -77,7 +87,7 @@ func (rt *Router) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 	// render.Render(w, r, Url(u))
 	responseURL := &ResponseURL{
 		ShortURL: "/" + u.ShortURL,
-		StatsURL: "/stats/" + u.ShortURL,
+		StatsURL: "/" + u.ShortURL + "/stats",
 	}
 
 	_ = render.Render(w, r, responseURL)
@@ -87,6 +97,7 @@ func (rt *Router) RedirectURL(w http.ResponseWriter, r *http.Request, shortURL s
 	url, err := rt.hs.GetURL(r.Context(), shortURL)
 	if err != nil {
 		log.Println(err)
+		// _ = render.Render(w, r, ErrNotFound)
 		http.Error(w, "not found", http.StatusNotFound)
 		return
 	}
@@ -97,9 +108,40 @@ func (rt *Router) GetStats(w http.ResponseWriter, r *http.Request, shortURL stri
 	url, err := rt.hs.GetStats(r.Context(), shortURL)
 	if err != nil {
 		log.Println(err)
-		http.Error(w, "not found", http.StatusNotFound)
+		_ = render.Render(w, r, ErrNotFound)
+		// http.Error(w, "not found", http.StatusNotFound)
 		return
 	}
 
 	_ = render.Render(w, r, Url(url))
+}
+
+func (rt *Router) GetMainPage(w http.ResponseWriter, r *http.Request) {
+	ts, err := template.ParseFiles("./web/templates/index.html")
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
+
+	if err = ts.Execute(w, nil); err != nil {
+		log.Println(err)
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
+}
+
+func (rt *Router) GetOpenAPI(w http.ResponseWriter, r *http.Request) {
+	ts, err := template.ParseFiles("./web/templates/openapi.html")
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
+
+	if err = ts.Execute(w, nil); err != nil {
+		log.Println(err)
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
 }
