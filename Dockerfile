@@ -12,6 +12,7 @@ FROM scratch
 WORKDIR /app
 
 COPY --from=build /app/run .
+COPY --from=build /app/web /app/web
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build /usr/share/zoneinfo /usr/share/zoneinfo
 ENV TZ=Europe/Moscow
