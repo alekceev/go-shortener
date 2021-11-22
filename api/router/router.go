@@ -44,6 +44,8 @@ func NewRouter(hs *handler.Handlers) *Router {
 		_ = enc.Encode(swg)
 	})
 
+	r.Get("/__heartbeat__", func(w http.ResponseWriter, r *http.Request) {})
+
 	ret.Mux = r
 	return ret
 }
