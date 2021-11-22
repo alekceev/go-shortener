@@ -8,6 +8,7 @@ import (
 
 	"github.com/alekceev/go-shortener/api/handler"
 	"github.com/alekceev/go-shortener/api/openapi"
+	"github.com/alekceev/go-shortener/app/config"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
@@ -15,7 +16,8 @@ import (
 
 type Router struct {
 	*chi.Mux
-	hs *handler.Handlers
+	hs          *handler.Handlers
+	VersionInfo config.VersionInfo
 }
 
 func NewRouter(hs *handler.Handlers) *Router {
@@ -24,6 +26,11 @@ func NewRouter(hs *handler.Handlers) *Router {
 
 	ret := &Router{
 		hs: hs,
+		VersionInfo: config.VersionInfo{
+			Version: config.Version,
+			Commit:  config.Commit,
+			Build:   config.Build,
+		},
 	}
 
 	r.Get("/", ret.GetMainPage)
@@ -45,6 +52,7 @@ func NewRouter(hs *handler.Handlers) *Router {
 	})
 
 	r.Get("/__heartbeat__", func(w http.ResponseWriter, r *http.Request) {})
+	r.Get("/__version__", ret.GetVersion)
 
 	ret.Mux = r
 	return ret
@@ -146,4 +154,22 @@ func (rt *Router) GetOpenAPI(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", 500)
 		return
 	}
+}
+
+type ResponseVersionInfo struct {
+	Version string `json:"version"`
+	Commit  string `json:"commit"`
+	Build   string `json:"build"`
+}
+
+func (ResponseVersionInfo) Bind(r *http.Request) error {
+	return nil
+}
+
+func (ResponseVersionInfo) Render(w http.ResponseWriter, r *http.Request) error {
+	return nil
+}
+
+func (rt *Router) GetVersion(w http.ResponseWriter, r *http.Request) {
+	_ = render.Render(w, r, ResponseVersionInfo(rt.VersionInfo))
 }

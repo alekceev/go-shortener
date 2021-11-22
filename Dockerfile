@@ -1,10 +1,26 @@
+ARG GIT_COMMIT
+ARG VERSION
+ARG PROJECT
+
 FROM golang:latest AS build
+
+ARG GIT_COMMIT
+ENV GIT_COMMIT=$GIT_COMMIT
+
+ARG VERSION
+ENV VERSION=$VERSION
+
+ARG PROJECT
+ENV PROJECT=$PROJECT
 
 WORKDIR /app
 COPY . .
 RUN go mod download
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -ldflags '-w -extldflags "-static"' -o ./run ./cmd/shorturl
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -ldflags '\
+    -w -extldflags "-static"\
+    -X ${PROJECT}/app/config.Version=${VERSION} -X ${PROJECT}/app/config.Commit=${GIT_COMMIT}\
+' -o ./run ./cmd/shorturl
 
 
 FROM scratch

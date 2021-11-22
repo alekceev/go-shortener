@@ -12,6 +12,12 @@ type Config struct {
 	DSN               string `envconfig:"DSN" default:""`
 }
 
+type VersionInfo struct {
+	Version string
+	Commit  string
+	Build   string
+}
+
 // init config
 func Get() (Config, error) {
 	config := Config{}
